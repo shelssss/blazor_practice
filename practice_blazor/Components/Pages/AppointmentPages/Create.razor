@@ -1,0 +1,66 @@
+﻿@page "/appointments/create"
+@using Microsoft.EntityFrameworkCore
+@using practice_blazor.Models
+@inject IDbContextFactory<practice_blazor.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create</PageTitle>
+
+<h1>Create</h1>
+
+<h2>Appointment</h2>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="Appointment" OnValidSubmit="AddAppointment" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert"/>
+            <div class="mb-3">
+                <label for="appointmentname" class="form-label">AppointmentName:</label> 
+                <InputText id="appointmentname" @bind-Value="Appointment.AppointmentName" class="form-control" /> 
+                <ValidationMessage For="() => Appointment.AppointmentName" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="dateappointed" class="form-label">DateAppointed:</label> 
+                <InputDate id="dateappointed" @bind-Value="Appointment.DateAppointed" class="form-control" /> 
+                <ValidationMessage For="() => Appointment.DateAppointed" class="text-danger" /> 
+            </div>  
+            @if (!string.IsNullOrEmpty(ErrorMessage))
+            {
+                <div class="alert alert-danger">@ErrorMessage</div>
+            }
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/appointments">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private Appointment Appointment { get; set; } = new();
+
+    private string? ErrorMessage; // To store validation messages
+
+    private async Task AddAppointment()
+    {
+        using var context = DbFactory.CreateDbContext();
+
+        // Check if the date is already taken
+        bool dateExists = await context.Appointment.AnyAsync(a => a.DateAppointed == Appointment.DateAppointed);
+
+        if (dateExists)
+        {
+            ErrorMessage = "The selected date is already booked for another appointment. Please choose another date";
+            return; // Stop further execution
+        }
+
+        // If date is available, add the appointment
+        context.Appointment.Add(Appointment);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/appointments");
+    }
+}
+

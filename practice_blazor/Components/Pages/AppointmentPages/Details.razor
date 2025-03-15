@@ -1,0 +1,48 @@
+﻿@page "/appointments/details"
+@using Microsoft.EntityFrameworkCore
+@using practice_blazor.Models
+@inject IDbContextFactory<practice_blazor.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Details</PageTitle>
+
+<h1>Details</h1>
+
+<div>
+    <h2>Appointment</h2>
+    <hr />
+    @if (appointment is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">AppointmentName</dt>
+            <dd class="col-sm-10">@appointment.AppointmentName</dd>
+            <dt class="col-sm-2">DateAppointed</dt>
+            <dd class="col-sm-10">@appointment.DateAppointed</dd>
+        </dl>
+        <div>
+            <a href="@($"/appointments/edit?id={appointment.id}")">Edit</a> |
+            <a href="@($"/appointments")">Back to List</a>
+        </div>
+    }
+</div>
+
+@code {
+    private Appointment? appointment;
+
+    [SupplyParameterFromQuery]
+    private Guid id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        appointment = await context.Appointment.FirstOrDefaultAsync(m => m.id == id);
+
+        if (appointment is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}

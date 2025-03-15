@@ -1,0 +1,94 @@
+﻿@page "/appointments/edit"
+@using Microsoft.EntityFrameworkCore
+@using practice_blazor.Models
+@inject IDbContextFactory<practice_blazor.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit</PageTitle>
+
+<h1>Edit</h1>
+
+<h2>Appointment</h2>
+<hr />
+@if (Appointment is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="Appointment" OnValidSubmit="UpdateAppointment" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary role="alert"/>
+                <input type="hidden" name="Appointment.id" value="@Appointment.id" />
+                <div class="mb-3">
+                    <label for="appointmentname" class="form-label">AppointmentName:</label>
+                    <InputText id="appointmentname" @bind-Value="Appointment.AppointmentName" class="form-control" />
+                    <ValidationMessage For="() => Appointment.AppointmentName" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="dateappointed" class="form-label">DateAppointed:</label>
+                    <InputDate id="dateappointed" @bind-Value="Appointment.DateAppointed" class="form-control" />
+                    <ValidationMessage For="() => Appointment.DateAppointed" class="text-danger" />
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/appointments">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    private Guid id { get; set; }
+
+    [SupplyParameterFromForm]
+    private Appointment? Appointment { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        Appointment ??= await context.Appointment.FirstOrDefaultAsync(m => m.id == id);
+
+        if (Appointment is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task UpdateAppointment()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Attach(Appointment!).State = EntityState.Modified;
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!AppointmentExists(Appointment!.id))
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        NavigationManager.NavigateTo("/appointments");
+    }
+
+    private bool AppointmentExists(Guid id)
+    {
+        using var context = DbFactory.CreateDbContext();
+        return context.Appointment.Any(e => e.id == id);
+    }
+}

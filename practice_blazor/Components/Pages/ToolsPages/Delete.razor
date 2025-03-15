@@ -1,0 +1,59 @@
+﻿@page "/tools/delete"
+@using Microsoft.EntityFrameworkCore
+@using practice_blazor.Models
+@inject IDbContextFactory<practice_blazor.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Delete</PageTitle>
+
+<h1>Delete</h1>
+
+<p>Are you sure you want to delete this?</p>
+<div>
+    <h2>Tools</h2>
+    <hr />
+    @if (tools is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">toolName</dt>
+            <dd class="col-sm-10">@tools.toolName</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">status</dt>
+            <dd class="col-sm-10">@tools.status</dd>
+        </dl>
+        <EditForm method="post" Model="tools" OnValidSubmit="DeleteTools" FormName="delete" Enhance>
+            <button type="submit" class="btn btn-danger" disabled="@(tools is null)">Delete</button> |
+            <a href="/tools">Back to List</a>
+        </EditForm>
+    }
+</div>
+
+@code {
+    private Tools? tools;
+
+    [SupplyParameterFromQuery]
+    private Guid id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        tools = await context.Tools.FirstOrDefaultAsync(m => m.id == id);
+
+        if (tools is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    private async Task DeleteTools()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Tools.Remove(tools!);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/tools");
+    }
+}
