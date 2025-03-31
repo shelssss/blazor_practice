@@ -28,9 +28,29 @@ else
                     <ValidationMessage For="() => Appointment.AppointmentName" class="text-danger" />
                 </div>
                 <div class="mb-3">
+                    <label for="clientname" class="form-label">ClientName:</label>
+                    <InputText id="clientname" @bind-Value="Appointment.ClientName" class="form-control" />
+                    <ValidationMessage For="() => Appointment.ClientName" class="text-danger" />
+                </div>
+                <div class="mb-3">
                     <label for="dateappointed" class="form-label">DateAppointed:</label>
                     <InputDate id="dateappointed" @bind-Value="Appointment.DateAppointed" class="form-control" />
                     <ValidationMessage For="() => Appointment.DateAppointed" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="serviceselected" class="form-label">ServiceSelected:</label>
+                    <InputText id="serviceselected" @bind-Value="Appointment.ServiceSelected" class="form-control" />
+                    <ValidationMessage For="() => Appointment.ServiceSelected" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="hoursrendered" class="form-label">HoursRendered:</label>
+                    <InputNumber id="hoursrendered" @bind-Value="Appointment.HoursRendered" class="form-control" />
+                    <ValidationMessage For="() => Appointment.HoursRendered" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="totalprice" class="form-label">TotalPrice:</label>
+                    <InputNumber id="totalprice" @bind-Value="Appointment.TotalPrice" class="form-control" />
+                    <ValidationMessage For="() => Appointment.TotalPrice" class="text-danger" />
                 </div>
                 <button type="submit" class="btn btn-primary">Save</button>
             </EditForm>

@@ -19,8 +19,16 @@
         <dl class="row">
             <dt class="col-sm-2">AppointmentName</dt>
             <dd class="col-sm-10">@appointment.AppointmentName</dd>
+            <dt class="col-sm-2">ClientName</dt>
+            <dd class="col-sm-10">@appointment.ClientName</dd>
             <dt class="col-sm-2">DateAppointed</dt>
             <dd class="col-sm-10">@appointment.DateAppointed</dd>
+            <dt class="col-sm-2">ServiceSelected</dt>
+            <dd class="col-sm-10">@appointment.ServiceSelected</dd>
+            <dt class="col-sm-2">HoursRendered</dt>
+            <dd class="col-sm-10">@appointment.HoursRendered</dd>
+            <dt class="col-sm-2">TotalPrice</dt>
+            <dd class="col-sm-10">@appointment.TotalPrice</dd>
         </dl>
         <div>
             <a href="@($"/appointments/edit?id={appointment.id}")">Edit</a> |

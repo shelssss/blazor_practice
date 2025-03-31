@@ -1,4 +1,4 @@
-﻿@page "/tools"
+﻿@page "/clients"
 @using Microsoft.EntityFrameworkCore
 @using Microsoft.AspNetCore.Components.QuickGrid
 @using practice_blazor.Models
@@ -8,21 +8,20 @@
 
 <PageTitle>Index</PageTitle>
 
-<h1>Index</h1>
+<h1>Clients</h1>
 
 <p>
-    <a href="tools/create">Create New</a>
+    <a href="clients/create">Create New</a>
 </p>
 
-<QuickGrid Class="table" Items="context.Tools">
-    <PropertyColumn Property="tools => tools.toolName" />
-    <PropertyColumn Property="tools => tools.CategoryName" />
-    <PropertyColumn Property="tools => tools.status" />
+<QuickGrid Class="table" Items="context.Clients">
+    <PropertyColumn Property="clients => clients.ClientName" />
+    <PropertyColumn Property="clients => clients.Birthday" />
 
-    <TemplateColumn Context="tools">
-        <a href="@($"tools/edit?id={tools.id}")">Edit</a> |
-        <a href="@($"tools/details?id={tools.id}")">Details</a> |
-        <a href="@($"tools/delete?id={tools.id}")">Delete</a>
+    <TemplateColumn Context="clients">
+        <a href="@($"clients/edit?id={clients.id}")">Edit</a> |
+        <a href="@($"clients/details?id={clients.id}")">Details</a> |
+        <a href="@($"clients/delete?id={clients.id}")">Delete</a>
     </TemplateColumn>
 </QuickGrid>
 

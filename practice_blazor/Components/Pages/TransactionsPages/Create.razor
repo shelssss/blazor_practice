@@ -1,0 +1,120 @@
+﻿@page "/transactions/create"
+@using Microsoft.EntityFrameworkCore
+@using practice_blazor.Models
+@inject IDbContextFactory<practice_blazor.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create</PageTitle>
+
+<h1>Create</h1>
+
+<h2>Transactions</h2>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="Transactions" OnValidSubmit="AddTransactions" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert"/>
+            <div class="mb-3">
+                <label for="clientname" class="form-label">ClientName:</label> 
+                <InputSelect id="clientname" @bind-Value="SelectedClient" class="form-control" @onchange="@onClientChanged">
+                    <option value="">-- Select Client --</option>
+                    @foreach (var client in Clients)
+                    {
+                        <option value="@client.ClientName">@client.ClientName</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="() => Transactions.ClientName" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="clientappoinment" class="form-label">ClientAppoinment:</label>
+                <InputSelect id="clientappoinment" @bind-Value="SelectedAppointment" class="form-control">
+                    <option value="">-- Select an Appointment --</option>
+                    @foreach (var appointment in FilteredAppointments)
+                    {
+                        <option value="@appointment.AppointmentName">@appointment.AppointmentName</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="() => Transactions.ClientAppoinment" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="paymentdate" class="form-label">PaymentDate:</label> 
+                <InputDate id="paymentdate" @bind-Value="Transactions.PaymentDate" class="form-control" /> 
+                <ValidationMessage For="() => Transactions.PaymentDate" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="payment" class="form-label">Payment:</label> 
+                <InputNumber id="payment" @bind-Value="Transactions.Payment" class="form-control" /> 
+                <ValidationMessage For="() => Transactions.Payment" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="paymentmethod" class="form-label">PaymentMethod:</label>
+                <InputSelect id="paymentmethod" @bind-Value="Transactions.PaymentMethod" class="form-control">
+                    <option value="Cash">Cash</option>
+                    <option value="Credit Card">Credit Card</option>
+                    <option value="Debit Card">Debit Card</option>
+                    <option value="GCash">GCash</option>
+                </InputSelect>
+                <ValidationMessage For="() => Transactions.PaymentMethod" class="text-danger" /> 
+            </div>        
+            <p>Selected Client: @SelectedClient</p>
+            <p>Filtered Appointments Count: @FilteredAppointments.Count</p>
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/transactions">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private Transactions Transactions { get; set; } = new();
+    private List<Clients> Clients = new();
+    private List<Appointment> Appointments = new();
+    private List<Appointment> FilteredAppointments = new();
+
+    private string SelectedClient = "";
+    private string SelectedAppointment = "";
+
+    private async Task AddTransactions()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Transactions.Add(Transactions);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/transactions");
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+
+        Clients = await context.Clients.ToListAsync();
+        Appointments = await context.Appointment.ToListAsync();
+    }
+
+    private void onClientChanged(ChangeEventArgs e)
+    {
+        SelectedClient = e.Value?.ToString() ?? "";
+        FilterAppointments();
+    }
+
+    private void FilterAppointments()
+    {
+        if (!string.IsNullOrEmpty(SelectedClient))
+        {
+            FilteredAppointments = Appointments
+                .Where(a => a.ClientName == SelectedClient)
+                .ToList();
+        }
+        else
+        {
+            FilteredAppointments = new List<Appointment>();
+        }
+
+        InvokeAsync(StateHasChanged); // Force UI update
+    }
+
+}
+

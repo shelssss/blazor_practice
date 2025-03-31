@@ -4,6 +4,7 @@
     {
         public Guid id { get; set; }
         public string toolName { get; set; }
+        public string CategoryName { get; set; }
         public string status { get; set; }
     }
 }

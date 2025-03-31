@@ -1,4 +1,4 @@
-﻿@page "/tools/details"
+﻿@page "/clients/details"
 @using Microsoft.EntityFrameworkCore
 @using practice_blazor.Models
 @inject IDbContextFactory<practice_blazor.Data.ApplicationDbContext> DbFactory
@@ -9,30 +9,28 @@
 <h1>Details</h1>
 
 <div>
-    <h2>Tools</h2>
+    <h2>Clients</h2>
     <hr />
-    @if (tools is null)
+    @if (clients is null)
     {
         <p><em>Loading...</em></p>
     }
     else {
         <dl class="row">
-            <dt class="col-sm-2">toolName</dt>
-            <dd class="col-sm-10">@tools.toolName</dd>
-            <dt class="col-sm-2">category</dt>
-            <dd class="col-sm-10">@tools.CategoryName</dd>
-            <dt class="col-sm-2">status</dt>
-            <dd class="col-sm-10">@tools.status</dd>
+            <dt class="col-sm-2">ClientName</dt>
+            <dd class="col-sm-10">@clients.ClientName</dd>
+            <dt class="col-sm-2">Birthday</dt>
+            <dd class="col-sm-10">@clients.Birthday</dd>
         </dl>
         <div>
-            <a href="@($"/tools/edit?id={tools.id}")">Edit</a> |
-            <a href="@($"/tools")">Back to List</a>
+            <a href="@($"/clients/edit?id={clients.id}")">Edit</a> |
+            <a href="@($"/clients")">Back to List</a>
         </div>
     }
 </div>
 
 @code {
-    private Tools? tools;
+    private Clients? clients;
 
     [SupplyParameterFromQuery]
     private Guid id { get; set; }
@@ -40,9 +38,9 @@
     protected override async Task OnInitializedAsync()
     {
         using var context = DbFactory.CreateDbContext();
-        tools = await context.Tools.FirstOrDefaultAsync(m => m.id == id);
+        clients = await context.Clients.FirstOrDefaultAsync(m => m.id == id);
 
-        if (tools is null)
+        if (clients is null)
         {
             NavigationManager.NavigateTo("notfound");
         }

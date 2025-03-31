@@ -21,14 +21,44 @@
                 <ValidationMessage For="() => Appointment.AppointmentName" class="text-danger" /> 
             </div>        
             <div class="mb-3">
+                <label for="ClientName" class="form-label">Client:</label>
+                <InputSelect id="ClientName" @bind-Value="Appointment.ClientName" class="form-control">
+                    <option value="">-- Select Client --</option>
+                    @foreach (var ClientName in ClientList)
+                    {
+                        <option value="@ClientName">@ClientName</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="() => Appointment.ClientName" class="text-danger" />
+            </div>
+            <div class="mb-3">
                 <label for="dateappointed" class="form-label">DateAppointed:</label> 
                 <InputDate id="dateappointed" @bind-Value="Appointment.DateAppointed" class="form-control" /> 
                 <ValidationMessage For="() => Appointment.DateAppointed" class="text-danger" /> 
-            </div>  
+            </div>
+            <div class="mb-3">
+                <label for="CategoryName" class="form-label">Category:</label>
+                <InputSelect id="CategoryName" @bind-Value="Appointment.ServiceSelected" class="form-control" @onchange="CalculateTotalPrice">
+                    <option value="">-- Select Category --</option>
+                    @foreach (var service in Services)
+                    {
+
+                        <option value="@service.CategoryName">@service.CategoryName - ₱@service.ServicePrice</option>
+                        
+                    }
+                </InputSelect>
+                <ValidationMessage For="() => Appointment.ServiceSelected" class="text-danger" />
+            </div>
+            <div class="mb-3">
+                <label for="hoursrendered" class="form-label">HoursRendered:</label> 
+                <InputNumber id="hoursrendered" @bind-Value="Appointment.HoursRendered" class="form-control" @oninput="CalculateTotalPrice" />
+                <ValidationMessage For="() => Appointment.HoursRendered" class="text-danger" /> 
+            </div>
             @if (!string.IsNullOrEmpty(ErrorMessage))
             {
                 <div class="alert alert-danger">@ErrorMessage</div>
             }
+                   
             <button type="submit" class="btn btn-primary">Create</button>
         </EditForm>
     </div>
@@ -41,11 +71,17 @@
 @code {
     [SupplyParameterFromForm]
     private Appointment Appointment { get; set; } = new();
-    
+    private List<string> CategoryList = new();
+    private List<string> ClientList = new();
+    private List<Service> Services = new();
     private string? ErrorMessage; // To store validation messages
+    private Dictionary<string, double> ServicePrices = new();
 
+
+    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
     private async Task AddAppointment()
     {
+        CalculateTotalPrice();
         using var context = DbFactory.CreateDbContext();
 
         // Check if the date is already taken
@@ -53,14 +89,43 @@
 
         if (dateExists)
         {
-            ErrorMessage = "The selected date is already booked for another appointment. Please choose another date";
+            ErrorMessage = "The selected date is already booked for another appointment.";
             return; // Stop further execution
         }
 
-        // If date is available, add the appointment
         context.Appointment.Add(Appointment);
         await context.SaveChangesAsync();
         NavigationManager.NavigateTo("/appointments");
     }
-}
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
 
+        Services = await context.Service
+        .Select(s => new Service { CategoryName = s.CategoryName, ServicePrice = s.ServicePrice })
+        .ToListAsync();
+        
+        ClientList = await context.Clients
+          .Select(cl => cl.ClientName)
+          .Distinct()
+          .ToListAsync();
+
+        ServicePrices = await context.Service
+            .ToDictionaryAsync(s => s.CategoryName, s => (double)s.ServicePrice);
+    }
+
+    private void CalculateTotalPrice()
+    {
+        if (!string.IsNullOrEmpty(Appointment.ServiceSelected) && ServicePrices.TryGetValue(Appointment.ServiceSelected, out var price))
+        {
+            Appointment.TotalPrice = price * (Appointment.HoursRendered > 0 ? Appointment.HoursRendered : 0);
+        }
+        else
+        {
+            Appointment.TotalPrice = 0; // Reset if no valid category is selected
+        }
+
+        StateHasChanged(); // Ensures UI updates
+    }
+
+}

@@ -1,0 +1,94 @@
+﻿@page "/clients/edit"
+@using Microsoft.EntityFrameworkCore
+@using practice_blazor.Models
+@inject IDbContextFactory<practice_blazor.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit</PageTitle>
+
+<h1>Edit</h1>
+
+<h2>Clients</h2>
+<hr />
+@if (Clients is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="Clients" OnValidSubmit="UpdateClients" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary role="alert"/>
+                <input type="hidden" name="Clients.id" value="@Clients.id" />
+                <div class="mb-3">
+                    <label for="clientname" class="form-label">ClientName:</label>
+                    <InputText id="clientname" @bind-Value="Clients.ClientName" class="form-control" />
+                    <ValidationMessage For="() => Clients.ClientName" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="birthday" class="form-label">Birthday:</label>
+                    <InputDate id="birthday" @bind-Value="Clients.Birthday" class="form-control" />
+                    <ValidationMessage For="() => Clients.Birthday" class="text-danger" />
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/clients">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    private Guid id { get; set; }
+
+    [SupplyParameterFromForm]
+    private Clients Clients { get; set; } = new Clients();
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        Clients ??= await context.Clients.FirstOrDefaultAsync(m => m.id == id);
+
+        if (Clients is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task UpdateClients()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Attach(Clients!).State = EntityState.Modified;
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!ClientsExists(Clients!.id))
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        NavigationManager.NavigateTo("/clients");
+    }
+
+    private bool ClientsExists(Guid id)
+    {
+        using var context = DbFactory.CreateDbContext();
+        return context.Clients.Any(e => e.id == id);
+    }
+}

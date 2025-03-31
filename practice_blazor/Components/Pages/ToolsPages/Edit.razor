@@ -28,8 +28,22 @@ else
                     <ValidationMessage For="() => Tools.toolName" class="text-danger" />
                 </div>
                 <div class="mb-3">
-                    <label for="status" class="form-label">status:</label>
-                    <InputText id="status" @bind-Value="Tools.status" class="form-control" />
+                    <label for="CategoryName" class="form-label">Category:</label>
+                    <InputSelect id="CategoryName" @bind-Value="Tools.CategoryName" class="form-control">
+                        <option value="">-- Select Category --</option>
+                        @foreach (var CategoryName in CategoryList)
+                        {
+                            <option value="@CategoryName">@CategoryName</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="() => Tools.CategoryName" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="status" class="form-label">Status:</label>
+                    <InputSelect id="status" @bind-Value="Tools.status" class="form-control">
+                        <option value="Available">Available</option>
+                        <option value="Not Available">Not Available</option>
+                    </InputSelect>
                     <ValidationMessage For="() => Tools.status" class="text-danger" />
                 </div>
                 <button type="submit" class="btn btn-primary">Save</button>
@@ -49,6 +63,8 @@ else
     [SupplyParameterFromForm]
     private Tools? Tools { get; set; }
 
+    private List<string> CategoryList = new();
+
     protected override async Task OnInitializedAsync()
     {
         using var context = DbFactory.CreateDbContext();
@@ -58,7 +74,14 @@ else
         {
             NavigationManager.NavigateTo("notfound");
         }
+
+        CategoryList = await context.Service
+          .Select(cat => cat.CategoryName)
+          .Distinct()
+          .ToListAsync();
     }
+
+   
 
     // To protect from overposting attacks, enable the specific properties you want to bind to.
     // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
@@ -91,4 +114,6 @@ else
         using var context = DbFactory.CreateDbContext();
         return context.Tools.Any(e => e.id == id);
     }
+
+
 }

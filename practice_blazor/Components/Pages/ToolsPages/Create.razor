@@ -21,10 +21,25 @@
                 <ValidationMessage For="() => Tools.toolName" class="text-danger" /> 
             </div>        
             <div class="mb-3">
-                <label for="status" class="form-label">Status:</label> 
-                <InputText id="status" @bind-Value="Tools.status" class="form-control" /> 
-                <ValidationMessage For="() => Tools.status" class="text-danger" /> 
-            </div>        
+                <label for="CategoryName" class="form-label">Category:</label>
+                <InputSelect id="CategoryName" @bind-Value="Tools.CategoryName" class="form-control">
+                    <option value="">-- Select Category --</option>
+                    @foreach (var CategoryName in CategoryList)
+                    {
+                        <option value="@CategoryName">@CategoryName</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="() => Tools.CategoryName" class="text-danger" />
+            </div>
+            <div class="mb-3">
+                <label for="status" class="form-label">Status:</label>
+                <InputSelect id="status" @bind-Value="Tools.status" class="form-control">
+                    <option value="Available">Available</option>
+                    <option value="Not Available">Not Available</option>
+                </InputSelect>
+                <ValidationMessage For="() => Tools.status" class="text-danger" />
+            </div>
+
             <button type="submit" class="btn btn-primary">Create</button>
         </EditForm>
     </div>
@@ -37,13 +52,25 @@
 @code {
     [SupplyParameterFromForm]
     private Tools Tools { get; set; } = new();
+    private Category Category { get; set; } = new();
+    private List<string> CategoryList = new();
 
     // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
     private async Task AddTools()
-    {
+    {   
         using var context = DbFactory.CreateDbContext();
+
         context.Tools.Add(Tools);
         await context.SaveChangesAsync();
         NavigationManager.NavigateTo("/tools");
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        CategoryList = await context.Service
+          .Select(cat => cat.CategoryName)
+          .Distinct()
+          .ToListAsync();
     }
 }

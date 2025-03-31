@@ -1,0 +1,40 @@
+﻿@page "/transactions"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using practice_blazor.Models
+@using practice_blazor.Data
+@implements IAsyncDisposable
+@inject IDbContextFactory<practice_blazor.Data.ApplicationDbContext> DbFactory
+
+<PageTitle>Index</PageTitle>
+
+<h1>Index</h1>
+
+<p>
+    <a href="transactions/create">Create New</a>
+</p>
+
+<QuickGrid Class="table" Items="context.Transactions">
+    <PropertyColumn Property="transactions => transactions.ClientName" />
+    <PropertyColumn Property="transactions => transactions.ClientAppoinment" />
+    <PropertyColumn Property="transactions => transactions.PaymentDate" />
+    <PropertyColumn Property="transactions => transactions.Payment" />
+    <PropertyColumn Property="transactions => transactions.PaymentMethod" />
+
+    <TemplateColumn Context="transactions">
+        <a href="@($"transactions/edit?id={transactions.Id}")">Edit</a> |
+        <a href="@($"transactions/details?id={transactions.Id}")">Details</a> |
+        <a href="@($"transactions/delete?id={transactions.Id}")">Delete</a>
+    </TemplateColumn>
+</QuickGrid>
+
+@code {
+    private ApplicationDbContext context = default!;
+
+    protected override void OnInitialized()
+    {
+        context = DbFactory.CreateDbContext();
+    }
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+}

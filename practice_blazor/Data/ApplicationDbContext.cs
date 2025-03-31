@@ -16,6 +16,9 @@ namespace practice_blazor.Data
 
         public DbSet<practice_blazor.Models.Product> Product { get; set; } = default!;
         public DbSet<practice_blazor.Models.Tools> Tools { get; set; } = default!;
+        public DbSet<practice_blazor.Models.Clients> Clients { get; set; } = default!;
+        public DbSet<practice_blazor.Models.Service> Service { get; set; } = default!;
         public DbSet<practice_blazor.Models.Appointment> Appointment { get; set; } = default!;
+        public DbSet<practice_blazor.Models.Transactions> Transactions { get; set; } = default!;
     }
 }

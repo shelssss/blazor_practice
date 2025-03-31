@@ -1,0 +1,49 @@
+﻿@page "/services/create"
+@using Microsoft.EntityFrameworkCore
+@using practice_blazor.Models
+@inject IDbContextFactory<practice_blazor.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create</PageTitle>
+
+<h1>Create</h1>
+
+<h2>Service</h2>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="Service" OnValidSubmit="AddService" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert"/>
+            <div class="mb-3">
+                <label for="categoryname" class="form-label">CategoryName:</label> 
+                <InputText id="categoryname" @bind-Value="Service.CategoryName" class="form-control" /> 
+                <ValidationMessage For="() => Service.CategoryName" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="serviceprice" class="form-label">ServicePrice:</label> 
+                <InputNumber id="serviceprice" @bind-Value="Service.ServicePrice" class="form-control" /> 
+                <ValidationMessage For="() => Service.ServicePrice" class="text-danger" /> 
+            </div>        
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/services">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private Service Service { get; set; } = new();
+
+    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task AddService()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Service.Add(Service);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/services");
+    }
+}

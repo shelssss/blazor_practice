@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using practice_blazor.Data;
 
@@ -11,9 +12,11 @@ using practice_blazor.Data;
 namespace practice_blazor.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250324025319_ServiceMigration")]
+    partial class ServiceMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -32,22 +35,8 @@ namespace practice_blazor.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("ClientName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTime>("DateAppointed")
                         .HasColumnType("datetime2");
-
-                    b.Property<int>("HoursRendered")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ServiceSelected")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<double>("TotalPrice")
-                        .HasColumnType("float");
 
                     b.HasKey("id");
 
@@ -132,35 +121,6 @@ namespace practice_blazor.Migrations
                     b.HasKey("id");
 
                     b.ToTable("Tools");
-                });
-
-            modelBuilder.Entity("practice_blazor.Models.Transactions", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("ClientAppoinment")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ClientName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<double>("Payment")
-                        .HasColumnType("float");
-
-                    b.Property<DateOnly>("PaymentDate")
-                        .HasColumnType("date");
-
-                    b.Property<string>("PaymentMethod")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Transactions");
                 });
 #pragma warning restore 612, 618
         }
